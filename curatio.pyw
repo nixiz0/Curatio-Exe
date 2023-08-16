@@ -1202,12 +1202,10 @@ def order_by(*args):
         messagebox.showwarning("Avertissement", "Aucun fichier sélectionné.")
         return
 
-    df = pd.read_csv(file_path)
-    _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-    _w1.Text1.insert(tk.END, df.to_csv(index=False))
-
     try:
         df = pd.read_csv(file_path)
+        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
+        _w1.Text1.insert(tk.END, df.to_csv(index=False))
     except pd.errors.EmptyDataError:
         messagebox.showerror('Erreur', "Le fichier est vide ou ne peut pas être lu.")
         return
@@ -1278,8 +1276,9 @@ def reverse_order(*args):
         df.sort_values(by=column_to_sort, ascending=False, inplace=True)
     else:
         df[column_to_sort] = df[column_to_sort].str.lower()
-        # Sort the DataFrame by the specified column in descending order (reverse order for text data)
-        df.sort_values(by=column_to_sort, ascending=False, inplace=True)
+            
+    # Sort the DataFrame by the specified column in descending order (reverse order for text data)
+    df.sort_values(by=column_to_sort, ascending=False, inplace=True)
 
     try:
         df.to_csv(file_path, index=False)
