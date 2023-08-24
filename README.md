@@ -9,26 +9,16 @@ You can find the documentation directly on the official page of the site :
 [Documentation](https://curatio.netlify.app/documentation_html/documentation)
 
 
-## Tech Stack
-**Python GUI:** 
 
-- tkinter
+## Installation of Python libraries
 
-**Python Packages:** 
+First, create a virtual environment with a python interpreter that you activate.
 
-- openpyxl
+Then, once you are with your terminal in the directory of the project folder you make the command below to install the python libraries necessary for the proper functioning of the program.
 
-- pandas
-
-- requests
-
-- beautifulsoup4
-
-- fake-useragent
-
-- matplotlib
-
-- seaborn
+```bash
+pip install -r requirements.txt
+```
 
 
 ## Run Curatio with Python 
