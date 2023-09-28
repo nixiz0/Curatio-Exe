@@ -716,7 +716,7 @@ def open_scrapper():
         messagebox.showwarning("Avertissement", "Aucune URL saisie")
         return
 
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 6.2;) AppleWebKit/534.11 (KHTML, like Gecko) Chrome/53.0.3631.346 Safari/536"}
 
     try:
         response = requests.get(url, headers=headers)
