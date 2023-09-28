@@ -14,7 +14,6 @@ from tkinter import filedialog, messagebox, simpledialog
 import requests
 import re
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 from urllib.robotparser import RobotFileParser
 
 _script = sys.argv[0]
@@ -709,7 +708,7 @@ def csv_xlsx(*args):
     except Exception as e:
         messagebox.showerror("Erreur", f"Une erreur est survenue lors de la conversion : {str(e)}")
         
-def open_scrapper(*args):
+def open_scrapper():
     app_theme()
     url = simpledialog.askstring("URL", "Entrez l'URL à scrapper:")
 
@@ -717,16 +716,9 @@ def open_scrapper(*args):
         messagebox.showwarning("Avertissement", "Aucune URL saisie")
         return
 
-    user_agent = UserAgent()
-
-    # Creates an instance of the robot parser to disable robots.txt
-    robot_parser = RobotFileParser()
-    robot_parser.allow_all = True
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"}
 
     try:
-        # Sends a GET request with the fake user agent
-        user_agent = UserAgent()
-        headers = {"User-Agent": user_agent.random}
         response = requests.get(url, headers=headers)
 
         # Parse content HTML of page
