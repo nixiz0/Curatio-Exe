@@ -714,6 +714,7 @@ def open_scrapper(*args):
     url = simpledialog.askstring("URL", "Entrez l'URL à scrapper:")
 
     if not url:
+        messagebox.showwarning("Avertissement", "Aucune URL saisie")
         return
 
     user_agent = UserAgent()
@@ -748,6 +749,7 @@ def open_scrapper(*args):
 
         file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
         if not file_path:
+            messagebox.showerror("Erreur", "Aucun chemin saisie")
             return
 
         # Writes data to CSV file including email addresses
