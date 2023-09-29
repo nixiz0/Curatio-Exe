@@ -193,7 +193,7 @@ class GraphicMenu:
         self.btn_cluster = tk.Button(self.top)
         self.btn_cluster.place(relx=0.679, rely=0.672, height=44, width=147)
         self.btn_cluster.configure(**BTN_PARAMS)
-        self.btn_cluster.configure(command=cluster)
+        self.btn_cluster.configure(command=clusters)
         self.btn_cluster.configure(pady="0")
         self.btn_cluster.configure(text='''Cluster''')
         self.btn_cluster.configure(image=cluster_png)
@@ -417,19 +417,19 @@ def surface_plot():
     df = pd.read_csv(file_path)
 
     # Ask the user to enter the name of column X & Check that column name X is valid
-    x_column = simpledialog.askstring("Choisir la colonne X", "Entrez le nom de la colonne X :")
+    x_column = simpledialog.askstring("Choisir la colonne X", "Entrez le nom de la colonne X (valeurs numériques):")
     if x_column not in df.columns:
         messagebox.showwarning("Avertissement", f"La colonne '{x_column}' n'existe pas dans le fichier CSV.")
         return
 
     # Ask the user to enter the name of column Y & Check that column name Y is valid
-    y_column = simpledialog.askstring("Choisir la colonne Y", "Entrez le nom de la colonne Y :")
+    y_column = simpledialog.askstring("Choisir la colonne Y", "Entrez le nom de la colonne Y (valeurs numériques) :")
     if y_column not in df.columns:
         messagebox.showwarning("Avertissement", f"La colonne '{y_column}' n'existe pas dans le fichier CSV.")
         return
 
     # Ask the user to enter the name of column Z & Check that column name Z is valid
-    z_column = simpledialog.askstring("Choisir la colonne Z (valeurs)", "Entrez le nom de la colonne Z (valeurs) :")
+    z_column = simpledialog.askstring("Choisir la colonne Z (valeurs)", "Entrez le nom de la colonne Z (valeurs numériques) :")
     if z_column not in df.columns:
         messagebox.showwarning("Avertissement", f"La colonne '{z_column}' n'existe pas dans le fichier CSV.")
         return
@@ -456,18 +456,18 @@ def heatmap():
 
     df = pd.read_csv(file_path)
     
-    choice_heatmap = simpledialog.askstring("Veuillez entrer 1 ou 2 \n", "--> 1 pour une heatmap à 2 colonnes simples (crosstab). \n --> 2 pour une heatmap à 3 colonnes, plus avancées (pivot).")
-    if (choice_heatmap != '1') and (choice_heatmap != '2'):
-        messagebox.showerror("Erreur", "Veuillez entrer 1 ou 2.")
+    choice_heatmap = simpledialog.askstring("Veuillez entrer 2 ou 3 \n", "--> 2 pour une heatmap à 2 colonnes simples (crosstab). \n --> 3 pour une heatmap à 3 colonnes, plus avancées (pivot).")
+    if (choice_heatmap != '2') and (choice_heatmap != '3'):
+        messagebox.showerror("Erreur", "Veuillez entrer 2 ou 3.")
         return
     else: 
-        if choice_heatmap == 1:
-            col1 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 1:")
+        if choice_heatmap == '2':
+            col1 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 1 :")
             if not col1:
                 messagebox.showerror("Erreur", "Le nom de la colonne 1 ne peut pas être vide.")
                 return
 
-            col2 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 2:")
+            col2 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 2 :")
             if not col2:
                 messagebox.showerror("Erreur", "Le nom de la colonne 2 ne peut pas être vide.")
                 return
@@ -739,7 +739,7 @@ def categorical():
     plt.show()
     
     
-def cluster():
+def clusters():
     file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     app_theme()
 
@@ -764,6 +764,7 @@ def cluster():
     plt.xticks(rotation=90)
     
     plt.show()
+
 
 if __name__ == '__main__':
     graphic_main()
