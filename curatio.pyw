@@ -4,6 +4,8 @@ import tkinter.ttk as ttk
 from tkinter.constants import *
 import os
 import os.path
+import subprocess
+import platform
 import csv
 import pandas as pd
 import math
@@ -15,6 +17,9 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from urllib.robotparser import RobotFileParser
+
+from ressources.graphic_tool.graphic_tool import graphic_main
+
 
 _script = sys.argv[0]
 _location = os.path.dirname(_script)
@@ -81,20 +86,7 @@ class Curatio:
                 ,background='#5f5f5f', borderwidth=1, disabledforeground='#a3a3a3'
                 ,font="-family {Constantia} -size 10 -weight bold"
                 ,foreground='#eeeeee', tearoff=0)
-        self.menubar.add_cascade(compound='left', label='Graphique'
-                ,menu=self.sub_menu0, )
-        self.sub_menu0.add_command(command=histogram_graph
-                ,compound='left', label='Histogramme')
-        self.sub_menu0.add_command(command=classic_graph
-                ,compound='left', label='Graphique classique')
-        self.sub_menu0.add_command(command=correlation_graph
-                ,compound='left', label='Corrélation')
-        self.sub_menu0.add_command(command=heatmap_graph    
-                ,compound='left', label='Heatmap')
-        self.sub_menu0.add_command(command=custom_graph
-                ,compound='left', label='Custom Graph')
-        self.sub_menu0.add_command(command=custom_histogram
-                ,compound='left', label='Custom Histogram')
+        self.menubar.add_command(label='Graphique', command=graphic_tool)
         self.menubar.add_cascade(compound='left', label='Convertisseur'
                 ,menu=self.sub_menu1, )
         self.sub_menu1.add_command(command=sql_csv
@@ -340,10 +332,14 @@ class Curatio:
 ################ FUNCTIONS TOOLS & Main ################
 ########################################################
 """
+def on_exit(icon, item):
+    icon.stop()
 
 def main(*args):
     global root
     root = tk.Tk()
+    # Icon in bar Windows
+    root.iconbitmap('./ressources/bitmap_curatio.ico')
     root.protocol( 'WM_DELETE_WINDOW' , root.destroy)
     global _top1, _w1
     _top1 = root
@@ -353,263 +349,12 @@ def main(*args):
 def app_theme():
     root.tk_setPalette(background='#444444', foreground='white')
     
-def menu_open_csv(*args):
+def menu_open_csv():
     open_csv()
     
-def histogram_graph():
-    file_path = filedialog.askopenfilename(filetypes=[('CSV files', '*.csv')])
-    app_theme()
-    
-    try:
-        df = pd.read_csv(file_path)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except pd.errors.EmptyDataError:
-        messagebox.showerror("Erreur", "Le fichier est vide ou corrompu.")
-        return
-    except FileNotFoundError:
-        messagebox.showerror("Erreur", "Fichier introuvable.")
-        return
-    except pd.errors.ParserError:
-        messagebox.showerror("Erreur", "Le format du fichier est incorrect.")
-        return
-    
-    column_name = simpledialog.askstring("Entrée", "Entrez le nom de la colonne à afficher:")
-    
-    # Check if the column exists in the dataframe
-    if column_name not in df.columns:
-        messagebox.showerror("Erreur", f"La colonne '{column_name}' n'existe pas dans le fichier.")
-        return
-    
-    # Create the histogram
-    plt.hist(df[column_name], bins=10)  # You can adjust the number of bins according to your preferences
-    
-    # Add labels and title
-    plt.xlabel(column_name)
-    plt.ylabel("Fréquence")
-    plt.title(f"Histogramme des données de la colonne '{column_name}'")
-    
-    # Display Histogram
-    plt.show()
-    
-def classic_graph():
-    filepath = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv")])
-    app_theme()
-    
-    if not filepath:
-        messagebox.showwarning("Avertissement", "Aucun fichier sélectionné.")
-        return
-    
-    try:
-        df = pd.read_csv(filepath)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors du chargement du fichier:\n{e}")
-        return
-    
-    # Ask for the column name to display
-    column_name = simpledialog.askstring("Nom de la colonne", "Entrez le nom de la colonne à afficher:")
-    
-    # Check if column name is valid
-    if not column_name:
-        messagebox.showwarning("Avertissement", "Nom de colonne invalide.")
-        return
-    
-    # Check if column name exists in DataFrame
-    if column_name not in df.columns:
-        messagebox.showwarning("Avertissement", f"Le nom de la colonne '{column_name}' n'existe pas dans le fichier.")
-        return
-    
-    # Create the chart from the column data
-    plt.figure(figsize=(10, 6))
-    plt.plot(df[column_name])
-    plt.xlabel("Index")
-    plt.ylabel(column_name)
-    plt.title(f"Graphique des données de la colonne '{column_name}'")
-    plt.grid(True)
-    plt.show()
-    
-def correlation_graph():
-    filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-    app_theme()
+def graphic_tool():
+    graphic_main()
 
-    if not filepath:
-        messagebox.showinfo("Info", "Sélection de fichier annulée.")
-        return
-
-    try:
-        df = pd.read_csv(filepath)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la lecture du fichier CSV : {e}")
-        return
-
-    column1 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 1 :")
-    column2 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 2 :")
-
-    if column1 not in df.columns or column2 not in df.columns:
-        messagebox.showerror("Erreur", "Les noms de colonnes spécifiés ne sont pas valides.")
-        return
-    
-    # Check that the columns are numeric
-    if not pd.api.types.is_numeric_dtype(df[column1]) or not pd.api.types.is_numeric_dtype(df[column2]):
-        messagebox.showerror("Erreur", "Les colonnes sélectionnées ne contiennent pas de données numériques.")
-        return
-
-    # Calculate the correlation between columns
-    correlation_value = df[column1].corr(df[column2])
-
-    # Display Correlation
-    messagebox.showinfo("Corrélation", f"La corrélation entre '{column1}' et '{column2}' est : {correlation_value:.2f}")
-
-    # Plot the correlation graph
-    plt.scatter(df[column1], df[column2])
-    plt.xlabel(column1)
-    plt.ylabel(column2)
-    plt.title(f"Corrélation entre {column1} et {column2}")
-    plt.show()
-    
-def heatmap_graph():
-    file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
-    app_theme()
-
-    if not file_path:
-        messagebox.showerror("Erreur", "Aucun fichier sélectionné.")
-        return
-
-    try:
-        df = pd.read_csv(file_path)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Impossible de charger le fichier : {str(e)}")
-        return
-
-    col1 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 1:")
-    if not col1:
-        messagebox.showerror("Erreur", "Le nom de la colonne 1 ne peut pas être vide.")
-        return
-
-    col2 = simpledialog.askstring("Entrée", "Entrez le nom de la colonne 2:")
-    if not col2:
-        messagebox.showerror("Erreur", "Le nom de la colonne 2 ne peut pas être vide.")
-        return
-
-    # Check if column names exist in the DataFrame
-    if col1 not in df.columns or col2 not in df.columns:
-        messagebox.showerror("Erreur", "Les noms de colonnes saisis ne sont pas présents dans le fichier.")
-        return
-
-    # Create heat map using seaborn and matplotlib
-    crosstab_data = pd.crosstab(df[col1], df[col2])
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(crosstab_data, annot=True, fmt="d", cmap="YlGnBu")
-    plt.title("Carte de chaleur")
-    plt.xlabel(col2)
-    plt.ylabel(col1)
-    plt.show()
-    
-def custom_graph():
-    file_path = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv")])
-    app_theme()
-
-    if not file_path:
-        messagebox.showerror("Erreur", "Aucun fichier sélectionné.")
-        return
-
-    try:
-        df = pd.read_csv(file_path)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la lecture du fichier : {str(e)}")
-        return
-
-    graphic_choice = simpledialog.askinteger("Choix", "Entrez 1 pour un graphique à une colonne, 2 pour deux colonnes:",
-                                              minvalue=1, maxvalue=2)
-
-    if graphic_choice == 1:
-        column = simpledialog.askstring("Nom de la colonne", "Entrez le nom de la colonne à utiliser:")
-        try:
-            plt.figure()
-            plt.plot(df[column])
-            plt.xlabel("Index")
-            plt.ylabel(column)
-            plt.title(f"Graphique de la colonne '{column}'")
-            plt.show()
-        except KeyError:
-            messagebox.showerror("Erreur", f"La colonne '{column}' n'existe pas dans le fichier CSV.")
-    elif graphic_choice == 2:
-        column_x = simpledialog.askstring("Nom de la colonne X", "Entrez le nom de la colonne X:")
-        column_y = simpledialog.askstring("Nom de la colonne Y", "Entrez le nom de la colonne Y:")
-        try:
-            plt.figure()
-            plt.plot(df[column_x], df[column_y])
-            plt.xlabel(column_x)
-            plt.ylabel(column_y)
-            plt.title(f"Graphique de '{column_x}' en fonction de '{column_y}'")
-            plt.show()
-        except KeyError as e:
-            messagebox.showerror("Erreur", f"La colonne '{str(e)}' n'existe pas dans le fichier CSV.")
-    else:
-        messagebox.showerror("Erreur", "Choix invalide. Veuillez saisir 1 ou 2.")
-        
-def custom_histogram():
-    file_path = filedialog.askopenfilename(filetypes=[("Fichiers CSV", "*.csv")])
-    app_theme()
-
-    if not file_path:
-        messagebox.showerror("Erreur", "Aucun fichier sélectionné.")
-        return
-
-    try:
-        df = pd.read_csv(file_path)
-        _w1.Text1.delete(1.0, tk.END)  # Clear the Text
-        _w1.Text1.insert(tk.END, df.to_csv(index=False))
-    except Exception as e:
-        messagebox.showerror("Erreur", f"Erreur lors de la lecture du fichier : {str(e)}")
-        return
-
-    graphic_choice = simpledialog.askinteger("Choix", "Entrez 1 pour un histogramme à une colonne, 2 pour deux colonnes:",
-                                              minvalue=1, maxvalue=2)
-
-    if graphic_choice == 1:
-        column = simpledialog.askstring("Nom de la colonne", "Entrez le nom de la colonne à utiliser:")
-        try:
-            plt.figure()
-            plt.hist(df[column], bins='auto')
-            plt.xlabel(column)
-            plt.ylabel("Fréquence")
-            plt.title(f"Histogramme de la colonne '{column}'")
-            plt.show()
-        except KeyError:
-            messagebox.showerror("Erreur", f"La colonne '{column}' n'existe pas dans le fichier CSV.")
-    elif graphic_choice == 2:
-        column_x = simpledialog.askstring("Nom de la colonne X", "Entrez le nom de la colonne X:")
-        column_y = simpledialog.askstring("Nom de la colonne Y", "Entrez le nom de la colonne Y:")
-        try:
-            plt.figure()
-            plt.subplot(1, 2, 1)
-            plt.hist(df[column_x], bins='auto')
-            plt.xlabel(column_x)
-            plt.ylabel("Fréquence")
-            plt.title(f"Histogramme de '{column_x}'")
-
-            plt.subplot(1, 2, 2)
-            plt.hist(df[column_y], bins='auto')
-            plt.xlabel(column_y)
-            plt.ylabel("Fréquence")
-            plt.title(f"Histogramme de '{column_y}'")
-
-            plt.tight_layout() 
-            plt.show()
-        except KeyError as e:
-            messagebox.showerror("Erreur", f"La colonne '{str(e)}' n'existe pas dans le fichier CSV.")
-    else:
-        messagebox.showerror("Erreur", "Choix invalide. Veuillez saisir 1 ou 2.")
-        
 def sql_csv(*args):
     root = tk.Tk()
     root.withdraw()
