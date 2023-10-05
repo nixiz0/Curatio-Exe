@@ -14,6 +14,8 @@ You can find the documentation directly on the official page of the site :
 
 First, create a virtual environment with a python interpreter that you activate.
 
+IMPORTANT : You Need To Have Python 3.11 !!
+
 Then, once you are with your terminal in the directory of the project folder you make the command below to install the python libraries necessary for the proper functioning of the program.
 
 ```bash
